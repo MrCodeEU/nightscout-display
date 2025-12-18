@@ -5,7 +5,9 @@
 
 A beautiful and feature-rich Elgato Stream Deck plugin that displays live blood glucose data from [Nightscout](https://github.com/nightscout/cgm-remote-monitor) with stunning visualizations and real-time updates.
 
-![Preview](assets/preview.png)
+| Number Display | Graph Display |
+|:--------------:|:-------------:|
+| ![Number View](assets/number.png) | ![Graph View](assets/graph.png) |
 
 ## ✨ Features
 

@@ -29,31 +29,12 @@ jobs:
         
       - name: Package plugin
         run: streamdeck pack com.mrcodeeu.nightscout-display.sdPlugin
-        
-      - name: Get release
-        id: get_release
-        if: github.event_name == 'release'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const release = await github.rest.repos.getReleaseByTag({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              tag: context.ref.replace('refs/tags/', '')
-            });
-            return release.data;
-          result-encoding: json
           
       - name: Upload Release Asset
         if: github.event_name == 'release'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
         with:
-          upload_url: ${{ fromJSON(steps.get_release.outputs.result).upload_url }}
-          asset_path: ./com.mrcodeeu.nightscout-display.streamDeckPlugin
-          asset_name: com.mrcodeeu.nightscout-display.streamDeckPlugin
-          asset_content_type: application/octet-stream
+          files: ./com.mrcodeeu.nightscout-display.streamDeckPlugin
           
       - name: Upload artifact (workflow_dispatch)
         if: github.event_name == 'workflow_dispatch'

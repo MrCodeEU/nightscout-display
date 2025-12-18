@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="144" height="144" viewBox="0 0 144 144" xmlns="http://www.w3.org/2000/svg">
+  <rect width="144" height="144" fill="#1a1a1a"/>
+  <circle cx="72" cy="50" r="25" fill="none" stroke="#00ff00" stroke-width="4"/>
+  <path d="M 72 75 L 72 95 M 72 95 L 60 85 M 72 95 L 84 85" stroke="#00ff00" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <text x="72" y="125" font-family="Arial" font-size="20" fill="#00ff00" text-anchor="middle">NS</text>
+</svg>

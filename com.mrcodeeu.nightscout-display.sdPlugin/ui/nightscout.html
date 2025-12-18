@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>com.mrcodeeu.nightscout-display</title>
+	<link rel="stylesheet" href="sdpi.css" />
+</head>
+<body>
+	<div class="sdpi-wrapper">
+		<!-- Usage Instructions -->
+		<details class="sdpi-item" open>
+			<summary class="sdpi-item-label">How to Use</summary>
+			<div class="sdpi-item-value">
+				<div style="padding: 10px; background: rgba(255,255,255,0.05); border-radius: 4px; font-size: 12px; line-height: 1.6;">
+					<p style="margin: 0 0 8px 0;"><strong>📊 Display Modes:</strong></p>
+					<ul style="margin: 0 0 12px 0; padding-left: 20px;">
+						<li><strong>Number View:</strong> Shows current glucose reading, trend arrow, and delta</li>
+						<li><strong>Graph View:</strong> Displays a 2-hour glucose trend graph</li>
+					</ul>
+					
+					<p style="margin: 0 0 8px 0;"><strong>🎮 Controls:</strong></p>
+					<ul style="margin: 0 0 12px 0; padding-left: 20px;">
+						<li><strong>Short Press (Click):</strong> Toggle between Number and Graph views</li>
+						<li><strong>Long Press (Hold 500ms+):</strong> Force refresh data from Nightscout API</li>
+					</ul>
+					
+					<p style="margin: 0 0 8px 0;"><strong>🎨 Color Coding:</strong></p>
+					<ul style="margin: 0; padding-left: 20px;">
+						<li><strong>Green:</strong> In target range</li>
+						<li><strong>Yellow:</strong> High or Low (outside normal range)</li>
+						<li><strong>Red:</strong> Urgent High or Urgent Low</li>
+					</ul>
+				</div>
+			</div>
+		</details>
+
+		<div type="separator"></div>
+
+		<!-- Nightscout Configuration -->
+		<div class="sdpi-item">
+			<div class="sdpi-item-label">Nightscout URL</div>
+			<div class="sdpi-item-value">
+				<input 
+					class="sdpi-item-value" 
+					type="url" 
+					id="nightscoutUrl" 
+					placeholder="https://yoursite.herokuapp.com"
+					oninput="saveSettings()"
+				/>
+			</div>
+		</div>
+
+		<div class="sdpi-item">
+			<div class="sdpi-item-label">API Token (Optional)</div>
+			<div class="sdpi-item-value">
+				<input 
+					class="sdpi-item-value" 
+					type="password" 
+					id="token" 
+					placeholder="Your Nightscout API secret"
+					oninput="saveSettings()"
+				/>
+			</div>
+			<div class="sdpi-item-value">
+				<span class="sdpi-item-child">
+					<input type="checkbox" id="showToken" onchange="toggleTokenVisibility()" />
+					<label for="showToken" style="font-size: 11px; margin-left: 4px;">Show token</label>
+				</span>
+			</div>
+		</div>
+
+		<div type="separator"></div>
+
+		<!-- Unit Selection -->
+		<div class="sdpi-item">
+			<div class="sdpi-item-label">Unit</div>
+			<div class="sdpi-item-value">
+				<div class="sdpi-item-child">
+					<input type="radio" id="unit_mgdl" name="unit" value="mgdl" onchange="saveSettings(); updateThresholdLabels();" />
+					<label for="unit_mgdl" class="sdpi-item-label"><span></span>mg/dL</label>
+				</div>
+				<div class="sdpi-item-child">
+					<input type="radio" id="unit_mmol" name="unit" value="mmol" onchange="saveSettings(); updateThresholdLabels();" />
+					<label for="unit_mmol" class="sdpi-item-label"><span></span>mmol/L</label>
+				</div>
+			</div>
+		</div>
+
+		<div type="separator"></div>
+
+		<!-- Graph Settings -->
+		<div class="sdpi-item">
+			<div class="sdpi-item-label">Graph Time Range</div>
+			<div class="sdpi-item-value">
+				<select class="sdpi-item-value" id="graphHours" onchange="saveSettings()">
+					<option value="4">4 hours</option>
+					<option value="6">6 hours</option>
+					<option value="8">8 hours</option>
+					<option value="12">12 hours</option>
+					<option value="24">24 hours</option>
+					<option value="48">48 hours</option>
+				</select>
+			</div>
+		</div>
+
+		<div type="separator"></div>
+
+		<!-- Threshold Settings -->
+		<div class="sdpi-item">
+			<div class="sdpi-item-label">Normal High <span id="normalHighUnit">(mg/dL)</span></div>
+			<div class="sdpi-item-value">
+				<input 
+					class="sdpi-item-value" 
+					type="number" 
+					id="normalHigh" 
+					min="0"
+					step="1"
+					placeholder="180"
+					oninput="saveSettings()"
+				/>
+			</div>
+		</div>
+
+		<div class="sdpi-item">
+			<div class="sdpi-item-label">Normal Low <span id="normalLowUnit">(mg/dL)</span></div>
+			<div class="sdpi-item-value">
+				<input 
+					class="sdpi-item-value" 
+					type="number" 
+					id="normalLow" 
+					min="0"
+					step="1"
+					placeholder="70"
+					oninput="saveSettings()"
+				/>
+			</div>
+		</div>
+
+		<div class="sdpi-item">
+			<div class="sdpi-item-label">Urgent High <span id="urgentHighUnit">(mg/dL)</span></div>
+			<div class="sdpi-item-value">
+				<input 
+					class="sdpi-item-value" 
+					type="number" 
+					id="urgentHigh" 
+					min="0"
+					step="1"
+					placeholder="250"
+					oninput="saveSettings()"
+				/>
+			</div>
+		</div>
+
+		<div class="sdpi-item">
+			<div class="sdpi-item-label">Urgent Low <span id="urgentLowUnit">(mg/dL)</span></div>
+			<div class="sdpi-item-value">
+				<input 
+					class="sdpi-item-value" 
+					type="number" 
+					id="urgentLow" 
+					min="0"
+					step="1"
+					placeholder="55"
+					oninput="saveSettings()"
+				/>
+			</div>
+		</div>
+
+		<div type="separator"></div>
+
+		<!-- Color Settings -->
+		<div class="sdpi-item">
+			<div class="sdpi-item-label">In-Range Color</div>
+			<div class="sdpi-item-value">
+				<input 
+					type="color" 
+					id="inRangeColor" 
+					value="#00FF00"
+					onchange="saveSettings()"
+				/>
+			</div>
+		</div>
+
+		<div class="sdpi-item">
+			<div class="sdpi-item-label">High/Low Color</div>
+			<div class="sdpi-item-value">
+				<input 
+					type="color" 
+					id="normalColor" 
+					value="#FFFF00"
+					onchange="saveSettings()"
+				/>
+			</div>
+		</div>
+
+		<div class="sdpi-item">
+			<div class="sdpi-item-label">Urgent Color</div>
+			<div class="sdpi-item-value">
+				<input 
+					type="color" 
+					id="urgentColor" 
+					value="#FF0000"
+					onchange="saveSettings()"
+				/>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		// Global variables
+		let actionInfo = {};
+		let incomingSettings = {};
+
+		// Initialize when connected to Stream Deck
+		function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
+			actionInfo = JSON.parse(inActionInfo);
+			incomingSettings = actionInfo.payload.settings;
+
+			const websocket = new WebSocket('ws://127.0.0.1:' + inPort);
+
+			websocket.onopen = function() {
+				const json = {
+					event: inRegisterEvent,
+					uuid: inUUID
+				};
+				websocket.send(JSON.stringify(json));
+				
+				// Load settings into UI
+				loadSettings();
+			};
+
+			websocket.onmessage = function(evt) {
+				const jsonObj = JSON.parse(evt.data);
+				const event = jsonObj.event;
+				const jsonPayload = jsonObj.payload;
+
+				if (event === 'didReceiveSettings') {
+					incomingSettings = jsonPayload.settings;
+					loadSettings();
+				}
+			};
+
+			// Save settings function - attached to window for access from HTML
+			window.saveSettings = function() {
+				const settings = {
+					nightscoutUrl: document.getElementById('nightscoutUrl').value.trim(),
+					token: document.getElementById('token').value.trim(),
+					unit: document.querySelector('input[name="unit"]:checked')?.value || 'mgdl',
+					graphHours: parseInt(document.getElementById('graphHours').value) || 8,
+					normalHigh: parseInt(document.getElementById('normalHigh').value) || 180,
+					normalLow: parseInt(document.getElementById('normalLow').value) || 70,
+					urgentHigh: parseInt(document.getElementById('urgentHigh').value) || 250,
+					urgentLow: parseInt(document.getElementById('urgentLow').value) || 55,
+					inRangeColor: document.getElementById('inRangeColor').value,
+					normalColor: document.getElementById('normalColor').value,
+					urgentColor: document.getElementById('urgentColor').value
+				};
+
+				const json = {
+					event: 'setSettings',
+					context: inUUID,
+					payload: settings
+				};
+
+				websocket.send(JSON.stringify(json));
+			};
+		}
+
+		// Load settings into UI
+		function loadSettings() {
+			const settings = incomingSettings || {};
+
+			// Set defaults
+			const defaults = {
+				nightscoutUrl: '',
+				token: '',
+				unit: 'mgdl',
+				graphHours: 8,
+				normalHigh: 180,
+				normalLow: 70,
+				urgentHigh: 250,
+				urgentLow: 55,
+				inRangeColor: '#00FF00',
+				normalColor: '#FFFF00',
+				urgentColor: '#FF0000'
+			};
+
+			const merged = { ...defaults, ...settings };
+
+			// Load values
+			document.getElementById('nightscoutUrl').value = merged.nightscoutUrl;
+			document.getElementById('token').value = merged.token;
+			
+			// Set radio button
+			const unitRadio = document.getElementById('unit_' + merged.unit);
+			if (unitRadio) unitRadio.checked = true;
+
+			document.getElementById('graphHours').value = merged.graphHours;
+			document.getElementById('normalHigh').value = merged.normalHigh;
+			document.getElementById('normalLow').value = merged.normalLow;
+			document.getElementById('urgentHigh').value = merged.urgentHigh;
+			document.getElementById('urgentLow').value = merged.urgentLow;
+			document.getElementById('inRangeColor').value = merged.inRangeColor;
+			document.getElementById('normalColor').value = merged.normalColor;
+			document.getElementById('urgentColor').value = merged.urgentColor;
+
+			updateThresholdLabels();
+		}
+
+		// Toggle token visibility
+		function toggleTokenVisibility() {
+			const tokenInput = document.getElementById('token');
+			const showToken = document.getElementById('showToken');
+			tokenInput.type = showToken.checked ? 'text' : 'password';
+		}
+
+		// Update threshold unit labels
+		function updateThresholdLabels() {
+			const unit = document.querySelector('input[name="unit"]:checked')?.value || 'mgdl';
+			const unitText = unit === 'mgdl' ? '(mg/dL)' : '(mmol/L)';
+			
+			document.getElementById('normalHighUnit').textContent = unitText;
+			document.getElementById('normalLowUnit').textContent = unitText;
+			document.getElementById('urgentHighUnit').textContent = unitText;
+			document.getElementById('urgentLowUnit').textContent = unitText;
+		}
+	</script>
+</body>
+</html>
